@@ -1,0 +1,96 @@
+<mat-toolbar color="secondary">
+    <button mat-icon-button (click)="previousMonth()" *ngIf="activeView === 'month'">
+        <mat-icon>chevron_left</mat-icon>
+    </button>
+    <button mat-icon-button (click)="previousWeek()" *ngIf="activeView === 'week'">
+        <mat-icon>chevron_left</mat-icon>
+    </button>
+    <button mat-icon-button (click)="previousDay()" *ngIf="activeView === 'day'">
+        <mat-icon>chevron_left</mat-icon>
+    </button>
+
+    <span class="toolbar-title">{{currentDate.format('MMMM YYYY')}}</span>
+
+    <button mat-icon-button (click)="nextMonth()" *ngIf="activeView === 'month'">
+        <mat-icon>chevron_right</mat-icon>
+    </button>
+    <button mat-icon-button (click)="nextWeek()" *ngIf="activeView === 'week'">
+        <mat-icon>chevron_right</mat-icon>
+    </button>
+    <button mat-icon-button (click)="nextDay()" *ngIf="activeView === 'day'">
+        <mat-icon>chevron_right</mat-icon>
+    </button>
+
+    <span class="spacer"></span>
+    <mat-button-toggle-group [value]="activeView" (change)="changeView($event.value)">
+        <mat-button-toggle value="month">Month</mat-button-toggle>
+        <mat-button-toggle value="week">Week</mat-button-toggle>
+        <mat-button-toggle value="day">Day</mat-button-toggle>
+    </mat-button-toggle-group>
+
+     <button mat-flat-button color="accent" (click)="openAddEventDialog()" style="margin-left: 10px;">
+    <mat-icon>add</mat-icon> Add Event 
+  </button>
+</mat-toolbar>
+
+<div *ngIf="activeView === 'month'" class="calendar-month-view">
+    <div class="week-days-header">
+        <span *ngFor="let dayName of getDayNames()" class="day-name">{{ dayName }}</span>
+    </div>
+    <div *ngFor="let week of calendarData" class="week">
+        <div *ngFor="let day of week" class="day" 
+             [class.current-month]="isSameMonth(day.date)" 
+             [class.today]="isToday(day.date)" 
+             (click)="dayClicked(day.date)">
+            <div class="day-number">{{day.date.date()}}</div>
+            <div *ngIf="day.events && day.events.length > 0" class="events-list">
+                <div *ngFor="let event of day.events" class="event-item">
+                    <span class="event-time">{{ event.releaseDateTime.format('h:mm a') }}</span> 
+                    <span class="event-title">{{ event.title }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div *ngIf="activeView === 'week'" class="calendar-week-view">
+     <div class="week-days-header">
+        <span *ngFor="let day of getWeekDays(currentDate)" class="day-name">
+            {{day.date.format('dddd DD')}}
+        </span>
+    </div>
+    <div class="week-days-content">
+        <div *ngFor="let day of getWeekDays(currentDate)" class="day-column">
+            <div *ngFor="let event of day.events" class="event-item">
+                <span class="event-time">{{ event.releaseDateTime.format('h:mm a') }}</span> 
+                <span class="event-title">{{ event.title }}</span>
+            </div>
+            <button mat-icon-button (click)="addEvent(day.date); " class="add-event-button">
+                <mat-icon>add</mat-icon>
+            </button>
+        </div>
+    </div>
+</div>
+
+<div *ngIf="activeView === 'day'" class="calendar-day-view">
+    <h3>Events for {{ currentDate.format('MMMM Do, YYYY') }}:</h3>
+    <ul *ngIf="selectedDayEvents.length > 0">
+        <li *ngFor="let event of selectedDayEvents">
+            <span class="event-time">{{ event.releaseDateTime.format('h:mm a') }}</span> 
+            <span class="event-title">{{ event.title }}</span>
+        </li>
+    </ul>
+    <p *ngIf="selectedDayEvents.length === 0">No events scheduled for this day.</p>
+    <button mat-flat-button color="primary" (click)="addEvent(currentDate)">Add Event</button>
+</div>
+
+
+<div *ngIf="selectedDayEvents.length > 0 && activeView !== 'day'" class="selected-day-events">
+    <h3>Events for {{ currentDate.format('MMMM Do, YYYY') }}</h3>
+    <ul>
+        <li *ngFor="let event of selectedDayEvents">
+            <span class="event-time">{{ event.releaseDateTime.format('h:mm a') }}</span> 
+            <span class="event-title">{{ event.title }}</span>
+        </li>
+    </ul>
+</div>

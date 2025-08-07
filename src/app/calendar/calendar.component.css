@@ -1,0 +1,199 @@
+.calendar {
+  margin: 20px;
+}
+
+.mat-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  background-color: rgb(136, 230, 230);
+}
+
+.toolbar-title {
+  flex-grow: 1;
+  text-align: center;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.week-days-header {
+  display: flex;
+  justify-content: space-around;
+  background-color: #f0f0f0;
+  padding: 8px 0;
+  font-weight: bold;
+}
+
+.day-name {
+  flex: 1;
+  text-align: center;
+}
+
+.calendar-month-view .week {
+  display: flex;
+  justify-content: space-around;
+  border-bottom: 8px solid #eee;
+  border-left: 7px solid #eee;
+}
+
+.calendar-month-view .day {
+  flex: 1;
+  border-right: 5px solid #eee;
+  padding: 10px;
+  min-height: 80px;
+  cursor: pointer;
+  position: relative;
+}
+
+.calendar-month-view .day:last-child {
+  border-right: 3px;
+}
+
+.day-number {
+  font-weight: bold;
+}
+
+.current-month {
+  background-color: #fff;
+}
+
+.today {
+  background-color: #e0f7fa;
+}
+
+.events-badge {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  background-color: #ff5722;
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 12px;
+}
+
+.selected-day-events {
+  margin-top: 20px;
+  padding: 15px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.calendar-week-view {
+  margin-top: 20px;
+}
+
+.week-days-content {
+  display: flex;
+  border: 1px solid #eee;
+}
+
+.day-column {
+  flex: 1;
+  border-right: 4px solid #eee;
+  padding: 10px;
+  min-height: 150px; /* Adjust height as needed */
+}
+
+.day-column:last-child {
+  border-right: none;
+}
+
+.event-item {
+  background-color: #bbdefb;
+  border-radius: 4px;
+  padding: 5px;
+  margin-bottom: 5px;
+  font-size: 14px;
+}
+
+.month-event{
+    background-color: #60a7e0;
+    border-radius: 4px;
+    padding: 5px;
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+
+
+.day {
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; 
+  align-items: flex-start; 
+  position: relative; 
+}
+.day-number {
+  align-self: flex-end;
+}
+
+.events-list {
+  width: 100%;
+  text-align: left;
+  max-height: 60px; 
+  overflow-y: auto; 
+}
+
+.event-item {
+  background-color: #e3f2fd; /* Light blue background */
+  border-radius: 4px;
+  padding: 2px 5px;
+  margin-bottom: 2px;
+  font-size: 0.75em;
+  display: flex; /* Use flex to align time and title */
+  gap: 5px; /* Space between time and title */
+  align-items: center;
+  white-space: nowrap; /* Prevent title from wrapping in month view */
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.event-time {
+  font-weight: bold;
+  color: #3f51b5; /* Material primary color */
+}
+
+
+.add-event-button {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  font-size: 18px; /* Adjust size of the icon */
+  height: 24px;   /* Match icon size */
+  width: 24px;    /* Match icon size */
+  line-height: 24px; /* Center icon vertically */
+  padding: 0;
+  min-width: unset; /* Override default button min-width */
+}
+
+/* Week view adjustments */
+.calendar-week-view .day-column {
+  /* ... existing styles ... */
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.calendar-week-view .event-item {
+    /* Adjust styles for week view if different */
+    white-space: normal; /* Allow title to wrap in week/day view */
+}
+
+/* Day view adjustments */
+.calendar-day-view ul li {
+    background-color: #e3f2fd;
+    border-radius: 4px;
+    padding: 8px;
+    margin-bottom: 5px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
