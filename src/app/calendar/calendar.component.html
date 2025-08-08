@@ -5,7 +5,7 @@
     <button mat-icon-button (click)="previousWeek()" *ngIf="activeView === 'week'">
         <mat-icon>chevron_left</mat-icon>
     </button>
-    <button mat-icon-button (click)="previousDay()" *ngIf="activeView === 'day'">
+    <button mat-icon-button (click)="previousDay()" *ngIf="activeView === 'list'">
         <mat-icon>chevron_left</mat-icon>
     </button>
 
@@ -17,7 +17,7 @@
     <button mat-icon-button (click)="nextWeek()" *ngIf="activeView === 'week'">
         <mat-icon>chevron_right</mat-icon>
     </button>
-    <button mat-icon-button (click)="nextDay()" *ngIf="activeView === 'day'">
+    <button mat-icon-button (click)="nextDay()" *ngIf="activeView === 'list'">
         <mat-icon>chevron_right</mat-icon>
     </button>
 
@@ -25,7 +25,7 @@
     <mat-button-toggle-group [value]="activeView" (change)="changeView($event.value)">
         <mat-button-toggle value="month">Month</mat-button-toggle>
         <mat-button-toggle value="week">Week</mat-button-toggle>
-        <mat-button-toggle value="day">Day</mat-button-toggle>
+        <mat-button-toggle value="list">List</mat-button-toggle>
     </mat-button-toggle-group>
 
      <button mat-flat-button color="accent" (click)="openAddEventDialog()" style="margin-left: 10px;">
@@ -46,7 +46,7 @@
             <div *ngIf="day.events && day.events.length > 0" class="events-list">
                 <div *ngFor="let event of day.events" class="event-item">
                     <span class="event-time">{{ event.releaseDateTime.format('h:mm a') }}</span> 
-                    <span class="event-title">{{ event.title }}</span>
+                    <span class="event-title" (click)="openEventDetailDialog(event)">{{ event.title }}</span>
                 </div>
             </div>
         </div>
@@ -63,7 +63,7 @@
         <div *ngFor="let day of getWeekDays(currentDate)" class="day-column">
             <div *ngFor="let event of day.events" class="event-item">
                 <span class="event-time">{{ event.releaseDateTime.format('h:mm a') }}</span> 
-                <span class="event-title">{{ event.title }}</span>
+                <span class="event-title" (click)="openEventDetailDialog(event)">{{ event.title }}</span>
             </div>
             <button mat-icon-button (click)="addEvent(day.date); " class="add-event-button">
                 <mat-icon>add</mat-icon>
@@ -72,12 +72,12 @@
     </div>
 </div>
 
-<div *ngIf="activeView === 'day'" class="calendar-day-view">
+<div *ngIf="activeView === 'list'" class="calendar-day-view">
     <h3>Events for {{ currentDate.format('MMMM Do, YYYY') }}:</h3>
     <ul *ngIf="selectedDayEvents.length > 0">
         <li *ngFor="let event of selectedDayEvents">
             <span class="event-time">{{ event.releaseDateTime.format('h:mm a') }}</span> 
-            <span class="event-title">{{ event.title }}</span>
+            <span class="event-title" (click)="openEventDetailDialog(event)">{{ event.title }}</span>
         </li>
     </ul>
     <p *ngIf="selectedDayEvents.length === 0">No events scheduled for this day.</p>
@@ -85,12 +85,12 @@
 </div>
 
 
-<div *ngIf="selectedDayEvents.length > 0 && activeView !== 'day'" class="selected-day-events">
+<div *ngIf="selectedDayEvents.length > 0 && activeView !== 'list'" class="selected-day-events">
     <h3>Events for {{ currentDate.format('MMMM Do, YYYY') }}</h3>
     <ul>
         <li *ngFor="let event of selectedDayEvents">
             <span class="event-time">{{ event.releaseDateTime.format('h:mm a') }}</span> 
-            <span class="event-title">{{ event.title }}</span>
+            <span class="event-title" (click)="openEventDetailDialog(event)">{{ event.title }}</span>
         </li>
     </ul>
 </div>
