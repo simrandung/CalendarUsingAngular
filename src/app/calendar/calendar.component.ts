@@ -1,6 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import * as moment from 'moment';
+import {MatTableDataSource} from '@angular/material/table';
+import {MatSort} from '@angular/material/sort';
+import { MatTableModule } from '@angular/material/table';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -11,6 +14,8 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { AddEventDialogComponent } from '../add-event-dialog/add-event-dialog.component';
 import { EventDetailsDialogComponent } from '../event-details-dialog/event-details-dialog.component';
 
+const local_storage = 'movieReleaseEvents';
+
 @Component({
   selector: 'app-calendar',
   standalone: true,
@@ -20,7 +25,8 @@ import { EventDetailsDialogComponent } from '../event-details-dialog/event-detai
     MatButtonModule,
     MatIconModule,
     MatDialogModule,
-    MatButtonToggleModule
+    MatButtonToggleModule,
+    MatTableModule
   ],
   templateUrl: './calendar.component.html',
   styleUrls: ['./calendar.component.css']
@@ -33,10 +39,47 @@ export class CalendarComponent implements OnInit {
   selectedDayEvents: MovieReleaseEvent[] = []; 
   activeView: 'month' | 'week' | 'list' = 'month';
 
+  dataSource = new MatTableDataSource<MovieReleaseEvent>(this.events)
+  displayedColumns: string[] = ['id','title','releaseDateTime']
+  
+  
+
   constructor(private dialog: MatDialog) { } 
 
   ngOnInit(): void {
+
+    this.dataSource.data = this.events;
+    this.loadEventsFromLocalStorage();
     this.loadView();
+  }
+
+  /**
+   * Loads events everytime from localStorage
+   */
+
+
+  loadEventsFromLocalStorage() {
+    const storedEvents = localStorage.getItem(local_storage)
+    if(storedEvents){
+      this.events = JSON.parse(storedEvents).map((event: any)=>({
+        ...event,
+        releaseDateTime: moment(event.releaseDateTime)
+      }));
+
+      this.dataSource.data = this.events;
+
+    } else {
+      this.events = [];
+      this.dataSource.data = [];
+    }
+  }
+
+  /**
+   * Saves the events to the local Storage in string format
+   */
+
+  saveEventsInLocalStorage(){
+    localStorage.setItem(local_storage,JSON.stringify(this.events))
   }
 
   /**
@@ -48,7 +91,7 @@ export class CalendarComponent implements OnInit {
     } else if (this.activeView === 'week') {
       this.loadWeek();
     } else if (this.activeView === 'list') {
-      this.loadDay();
+      this.loadList();
     }
   }
 
@@ -99,6 +142,13 @@ export class CalendarComponent implements OnInit {
   */
   loadDay() {
     this.selectedDayEvents = this.getEventsForDay(this.currentDate);
+  }
+
+  /**
+   * Loads all data into datasource and visible in table
+   */
+  loadList(){
+    this.dataSource.data = this.events
   }
 
   /**
@@ -188,9 +238,43 @@ export class CalendarComponent implements OnInit {
     dialogRef.afterClosed().subscribe((result: MovieReleaseEvent) => {
       if (result) {
         result.id = this.events.length > 0 ? Math.max(...this.events.map(e => e.id || 0)) + 1 : 1;
+        const a = this.events.forEach(event => {
+          // console.log(event.releaseDateTime);
+          // console.log(event.releaseDateTime);
+          // console.log(event.title);
+          event.releaseDateTime.format('HH:mm')
+          console.log(event.releaseDateTime.toLocaleString());
+          console.log(event.releaseDateTime.toLocaleString());
+          console.log(event.releaseDateTime.format('HH:mm')); 
+        })
+
+        console.log(a);
+        this.events.forEach(b=>{
+           console.log(b.title);
+           
+        });
+    
+        
+        
+        
+        //   console.log(this.events);
+        // }
+      //   this.events.forEach(event => {
+      //    console.log(event.title);
+      // })
+        
         this.events.push(result);
-        this.events.sort((a, b) => a.releaseDateTime.diff(b.releaseDateTime));
+        this.events.sort((a, b) => a.releaseDateTime.diff(b.releaseDateTime), );
+        this.dataSource.data = this.events;
+        this.saveEventsInLocalStorage();
         this.loadView();
+        // console.log(this.events);
+        // if(result.releaseDateTime === this.events[0].releaseDateTime){
+        //   console.log('same time');
+          
+
+        // }
+        
         //console.log(result);
         
       }
@@ -266,6 +350,8 @@ export class CalendarComponent implements OnInit {
   deleteEvent(eventId: number | undefined) :void {
     if(eventId !== undefined){
       this.events = this.events.filter(event => event.id !== eventId);
+      this.dataSource.data = this.events;
+      this.saveEventsInLocalStorage();
       this.loadView();
     }
   }

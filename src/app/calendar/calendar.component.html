@@ -10,7 +10,6 @@
     </button>
 
     <span class="toolbar-title">{{currentDate.format('MMMM YYYY')}}</span>
-
     <button mat-icon-button (click)="nextMonth()" *ngIf="activeView === 'month'">
         <mat-icon>chevron_right</mat-icon>
     </button>
@@ -73,7 +72,7 @@
 </div>
 
 <div *ngIf="activeView === 'list'" class="calendar-day-view">
-    <h3>Events for {{ currentDate.format('MMMM Do, YYYY') }}:</h3>
+    <!-- <h3>Events for {{ currentDate.format('MMMM Do, YYYY') }}:</h3>
     <ul *ngIf="selectedDayEvents.length > 0">
         <li *ngFor="let event of selectedDayEvents">
             <span class="event-time">{{ event.releaseDateTime.format('h:mm a') }}</span> 
@@ -81,7 +80,26 @@
         </li>
     </ul>
     <p *ngIf="selectedDayEvents.length === 0">No events scheduled for this day.</p>
-    <button mat-flat-button color="primary" (click)="addEvent(currentDate)">Add Event</button>
+    <button mat-flat-button color="primary" (click)="addEvent(currentDate)">Add Event</button> -->
+
+    <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+        <ng-container matColumnDef="id">
+            <th mat-header-cell *matHeaderCellDef>ID</th>
+            <td mat-cell *matCellDef="let element">{{element.id}}</td>
+        </ng-container>
+        <ng-container matColumnDef="title">
+            <th mat-header-cell *matHeaderCellDef>Title</th>
+            <td mat-cell *matCellDef="let element">{{element.title}}</td>
+        </ng-container>
+        <ng-container matColumnDef="releaseDateTime">
+            <th mat-header-cell *matHeaderCellDef>Release Time</th>
+            <td mat-cell *matCellDef="let element">{{element.releaseDateTime}}</td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+
 </div>
 
 
@@ -93,4 +111,5 @@
             <span class="event-title" (click)="openEventDetailDialog(event)">{{ event.title }}</span>
         </li>
     </ul>
-</div>
+    
+    </div>

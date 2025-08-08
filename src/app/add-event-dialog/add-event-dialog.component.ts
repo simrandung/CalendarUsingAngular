@@ -46,17 +46,23 @@ export class AddEventDialogComponent {
   }
 
   onSave(): void {
+    console.log();
+    
     if (this.eventForm.valid) {
       const formValue = this.eventForm.value;
       const selectedDate: moment.Moment = formValue.date; 
       const selectedTime = moment(formValue.time, 'HH:mm'); 
-
+      
       const releaseDateTime = selectedDate.clone().hour(selectedTime.hour()).minute(selectedTime.minute());
-
+      console.log(selectedTime.hour);
+      
+      
+    
       const newEvent: MovieReleaseEvent = {
         title: formValue.title,
         releaseDateTime: releaseDateTime
       };
+      
       this.dialogRef.close(newEvent);
     }
   }
