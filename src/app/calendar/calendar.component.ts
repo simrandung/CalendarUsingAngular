@@ -1,14 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import * as moment from 'moment';
-import {MatTableDataSource} from '@angular/material/table';
-import {MatSort} from '@angular/material/sort';
+import { MatTableDataSource } from '@angular/material/table';
+import { MatSort } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
-import { MovieReleaseEvent } from '../movies.model'; 
+import { MovieReleaseEvent } from '../movies.model';
 import { MatDialog } from '@angular/material/dialog';
 import { MatDialogModule } from '@angular/material/dialog';
 import { AddEventDialogComponent } from '../add-event-dialog/add-event-dialog.component';
@@ -32,22 +32,19 @@ const local_storage = 'movieReleaseEvents';
   styleUrls: ['./calendar.component.css']
 })
 export class CalendarComponent implements OnInit {
-  
+
   events: MovieReleaseEvent[] = [];
   currentDate: moment.Moment = moment();
   calendarData: any[] = [];
-  selectedDayEvents: MovieReleaseEvent[] = []; 
+  selectedDayEvents: MovieReleaseEvent[] = [];
   activeView: 'month' | 'week' | 'list' = 'month';
 
   dataSource = new MatTableDataSource<MovieReleaseEvent>(this.events)
-  displayedColumns: string[] = ['id','title','releaseDateTime']
-  
-  
+  displayedColumns: string[] = ['id', 'title', 'releaseDateTime']
 
-  constructor(private dialog: MatDialog) { } 
+  constructor(private dialog: MatDialog) { }
 
   ngOnInit(): void {
-
     this.dataSource.data = this.events;
     this.loadEventsFromLocalStorage();
     this.loadView();
@@ -56,12 +53,10 @@ export class CalendarComponent implements OnInit {
   /**
    * Loads events everytime from localStorage
    */
-
-
   loadEventsFromLocalStorage() {
     const storedEvents = localStorage.getItem(local_storage)
-    if(storedEvents){
-      this.events = JSON.parse(storedEvents).map((event: any)=>({
+    if (storedEvents) {
+      this.events = JSON.parse(storedEvents).map((event: any) => ({
         ...event,
         releaseDateTime: moment(event.releaseDateTime)
       }));
@@ -77,9 +72,8 @@ export class CalendarComponent implements OnInit {
   /**
    * Saves the events to the local Storage in string format
    */
-
-  saveEventsInLocalStorage(){
-    localStorage.setItem(local_storage,JSON.stringify(this.events))
+  saveEventsInLocalStorage() {
+    localStorage.setItem(local_storage, JSON.stringify(this.events))
   }
 
   /**
@@ -110,7 +104,7 @@ export class CalendarComponent implements OnInit {
         const currentDay = day.clone();
         week.push({
           date: currentDay,
-          events: this.getEventsForDay(currentDay) 
+          events: this.getEventsForDay(currentDay)
         });
         day.add(1, 'day');
       }
@@ -130,7 +124,7 @@ export class CalendarComponent implements OnInit {
       const currentDay = startOfWeek.clone().add(i, 'days');
       week.push({
         date: currentDay,
-        events: this.getEventsForDay(currentDay) 
+        events: this.getEventsForDay(currentDay)
       });
     }
     this.calendarData.push(week);
@@ -147,7 +141,7 @@ export class CalendarComponent implements OnInit {
   /**
    * Loads all data into datasource and visible in table
    */
-  loadList(){
+  loadList() {
     this.dataSource.data = this.events
   }
 
@@ -157,9 +151,9 @@ export class CalendarComponent implements OnInit {
   */
   getEventsForDay(date: moment.Moment): MovieReleaseEvent[] {
     const eventsForDay = this.events.filter(event =>
-      moment(event.releaseDateTime).isSame(date, 'day') 
+      moment(event.releaseDateTime).isSame(date, 'day')
     );
-    return eventsForDay.sort((a, b) => a.releaseDateTime.diff(b.releaseDateTime)); 
+    return eventsForDay.sort((a, b) => a.releaseDateTime.diff(b.releaseDateTime));
   }
 
   /**
@@ -216,12 +210,12 @@ export class CalendarComponent implements OnInit {
   dayClicked(date: moment.Moment) {
     this.currentDate = date.clone();
     this.selectedDayEvents = this.getEventsForDay(date);
-    
+
   }
 
- /**
-  * opens dialog box
- */
+  /**
+   * opens dialog box
+  */
   openAddEventDialog(): void {
     this.addEvent(this.currentDate.clone());
   }
@@ -233,50 +227,76 @@ export class CalendarComponent implements OnInit {
     const dialogRef = this.dialog.open(AddEventDialogComponent, {
       width: '800px',
       data: { date: date.clone() },
-       
+
     });
     dialogRef.afterClosed().subscribe((result: MovieReleaseEvent) => {
       if (result) {
-        result.id = this.events.length > 0 ? Math.max(...this.events.map(e => e.id || 0)) + 1 : 1;
-        const a = this.events.forEach(event => {
-          // console.log(event.releaseDateTime);
-          // console.log(event.releaseDateTime);
-          // console.log(event.title);
-          event.releaseDateTime.format('HH:mm')
-          console.log(event.releaseDateTime.toLocaleString());
-          console.log(event.releaseDateTime.toLocaleString());
-          console.log(event.releaseDateTime.format('HH:mm')); 
-        })
+        //console.log(result);
+        // const eventExists = this.events.some((event) => {
+        //   const existingDate = event.releaseDateTime.clone();
+        //   const newDate = result.releaseDateTime.clone();
+        //   console.log("Existing event date:", existingDate.format('HH:mm'));
+        //   console.log("New event date:", newDate.format('HH:mm'));
+        //   console.log("Are dates and times the same?", existingDate.isSame(newDate));
+        //   return existingDate.isSame(newDate);
+        // });
 
+        // if (eventExists) {
+        //   alert('Cannot add event at the same date and time');
+        //   return;
+        // }
+        const a = this.events.some(
+          (event)=>{
+            //console.log(event.releaseDateTime);
+            //console.log(result.releaseDateTime);
+            const eventExists = event.releaseDateTime.format() === result.releaseDateTime.format()
+            console.log(eventExists)
+            //console.log('same time')
+             
+            //event.releaseDateTime.isSame(result.releaseDateTime)
+            //console.log('same too same');
+            return eventExists;
+          }
+        )
         console.log(a);
-        this.events.forEach(b=>{
-           console.log(b.title);
-           
-        });
-    
-        
-        
-        
+        if(a){
+          alert('Can not add event on same time');
+          return;
+        }
+
+        result.id = this.events.length > 0 ? Math.max(...this.events.map(e => e.id || 0)) + 1 : 1;
+        // const a = this.events.forEach(event => {
+        // console.log(event.releaseDateTime);
+        // console.log(event.releaseDateTime);
+        // console.log(event.title);
+        // event.releaseDateTime.format('HH:mm')
+        // console.log(event.releaseDateTime.format('HH:mm')); 
+        // console.log(result.releaseDateTime.format('HH:mm'));
+        // if(event.releaseDateTime.format('HH:mm') === result.releaseDateTime.format('HH:mm')){
+        //   console.log('same time');
+        //   alert('Can not add on same time'); 
+        //   }
+        // })
+        // console.log(a);
+        // this.events.forEach(b=>{
+        //    console.log(b.title);   
+        // });
         //   console.log(this.events);
         // }
-      //   this.events.forEach(event => {
-      //    console.log(event.title);
-      // })
-        
+        //   this.events.forEach(event => {
+        //    console.log(event.title);
+        // })  
         this.events.push(result);
-        this.events.sort((a, b) => a.releaseDateTime.diff(b.releaseDateTime), );
+        this.events.sort((a, b) => a.releaseDateTime.diff(b.releaseDateTime),);
         this.dataSource.data = this.events;
         this.saveEventsInLocalStorage();
         this.loadView();
         // console.log(this.events);
         // if(result.releaseDateTime === this.events[0].releaseDateTime){
         //   console.log('same time');
-          
-
         // }
-        
         //console.log(result);
-        
+
       }
     });
   }
@@ -289,9 +309,9 @@ export class CalendarComponent implements OnInit {
     this.loadView();
   }
 
- /**
- * @returns names of weekdays from moment library
- */
+  /**
+  * @returns names of weekdays from moment library
+  */
   getDayNames(): string[] {
     return moment.weekdays();
   }
@@ -332,13 +352,13 @@ export class CalendarComponent implements OnInit {
   /**
    * Dialogbox for opening details of an event and delete option
   */
-  openEventDetailDialog(event:MovieReleaseEvent): void{
+  openEventDetailDialog(event: MovieReleaseEvent): void {
     const dialogRef = this.dialog.open(EventDetailsDialogComponent, {
       width: '400px',
-      data:{event:event}
+      data: { event: event }
     })
     dialogRef.afterClosed().subscribe(result => {
-      if(result === 'delete'){
+      if (result === 'delete') {
         this.deleteEvent(event.id);
       }
     })
@@ -347,8 +367,8 @@ export class CalendarComponent implements OnInit {
   /**
    * @param eventId matches the id returned from dialogbox event id and delete accordingly
    */
-  deleteEvent(eventId: number | undefined) :void {
-    if(eventId !== undefined){
+  deleteEvent(eventId: number | undefined): void {
+    if (eventId !== undefined) {
       this.events = this.events.filter(event => event.id !== eventId);
       this.dataSource.data = this.events;
       this.saveEventsInLocalStorage();

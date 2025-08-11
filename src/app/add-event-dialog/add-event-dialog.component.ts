@@ -54,7 +54,7 @@ export class AddEventDialogComponent {
       const selectedTime = moment(formValue.time, 'HH:mm'); 
       
       const releaseDateTime = selectedDate.clone().hour(selectedTime.hour()).minute(selectedTime.minute());
-      console.log(selectedTime.hour);
+      // console.log(selectedTime.hour);
       
       
     
