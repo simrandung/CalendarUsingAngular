@@ -6,4 +6,5 @@ export interface MovieReleaseEvent {
   title: string;
   releaseDateTime: Moment;
   description?: string;
+  genre: string
 }

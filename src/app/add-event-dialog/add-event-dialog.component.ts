@@ -9,6 +9,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDatepickerModule } from '@angular/material/datepicker'; 
 import { MatMomentDateModule } from '@angular/material-moment-adapter'; 
+import { MatSelectModule } from '@angular/material/select';
 
 @Component({
   selector: 'app-add-event-dialog',
@@ -21,13 +22,15 @@ import { MatMomentDateModule } from '@angular/material-moment-adapter';
     MatButtonModule,
     MatDialogModule,
     MatDatepickerModule,
-    MatMomentDateModule 
+    MatMomentDateModule,
+    MatSelectModule
   ],
   templateUrl: './add-event-dialog.component.html',
   styleUrls: ['./add-event-dialog.component.css']
 })
 export class AddEventDialogComponent {
   eventForm: FormGroup;
+  availableGenres:string[] = ['Action', 'Comedy','Drama','Sci-Fi','Romance','Horror']
 
   constructor(
     public dialogRef: MatDialogRef<AddEventDialogComponent>,
@@ -37,7 +40,8 @@ export class AddEventDialogComponent {
     this.eventForm = this.fb.group({
       title: ['', Validators.required],
       date: [data.date.clone(), Validators.required], 
-      time: [data.date.format('HH:mm'), Validators.required]
+      time: [data.date.format('HH:mm'), Validators.required],
+      genre: ['',Validators.required]
     });
   }
 
@@ -60,7 +64,8 @@ export class AddEventDialogComponent {
     
       const newEvent: MovieReleaseEvent = {
         title: formValue.title,
-        releaseDateTime: releaseDateTime
+        releaseDateTime: releaseDateTime,
+        genre: formValue.genre
       };
       
       this.dialogRef.close(newEvent);

@@ -6,6 +6,9 @@ import { MatSort } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
+import {MatSelectModule} from '@angular/material/select';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MovieReleaseEvent } from '../movies.model';
@@ -26,7 +29,10 @@ const local_storage = 'movieReleaseEvents';
     MatIconModule,
     MatDialogModule,
     MatButtonToggleModule,
-    MatTableModule
+    MatTableModule,
+    MatFormFieldModule,
+    FormsModule,
+    MatSelectModule
   ],
   templateUrl: './calendar.component.html',
   styleUrls: ['./calendar.component.css']
@@ -40,15 +46,38 @@ export class CalendarComponent implements OnInit {
   activeView: 'month' | 'week' | 'list' = 'month';
 
   dataSource = new MatTableDataSource<MovieReleaseEvent>(this.events)
-  displayedColumns: string[] = ['id', 'title', 'releaseDateTime']
+  displayedColumns: string[] = ['id', 'title', 'releaseDateTime','genre']
+
+  availableGenres: string[] = []
+  selectedGenre:string = 'All'
 
   constructor(private dialog: MatDialog) { }
 
   ngOnInit(): void {
     this.dataSource.data = this.events;
     this.loadEventsFromLocalStorage();
+    this.extractGenres();
     this.loadView();
   }
+  extractGenres() {
+    this.availableGenres = [...new Set(this.events.map(event=> event.genre))]
+  }
+
+  filterEventsByGenres(): MovieReleaseEvent[]{
+    if(this.selectedGenre === 'All'){
+      return this.events
+    }
+    else{
+      return this.events.filter(event => event.genre === this.selectedGenre);
+    }
+
+  }
+
+  onGenreFilterChange(){
+    this.loadView();
+  }
+
+  
 
   /**
    * Loads events everytime from localStorage
@@ -80,19 +109,20 @@ export class CalendarComponent implements OnInit {
   * Changes view of the calendar when toggeled
   */
   loadView() {
+    const filteredEvents = this.filterEventsByGenres();
     if (this.activeView === 'month') {
-      this.loadCalendar();
+      this.loadCalendar(filteredEvents);
     } else if (this.activeView === 'week') {
-      this.loadWeek();
+      this.loadWeek(filteredEvents);
     } else if (this.activeView === 'list') {
-      this.loadList();
+      this.loadList(filteredEvents);
     }
   }
 
   /**
   * Loads the calendar using all the data present in calendarData array
   */
-  loadCalendar() {
+  loadCalendar(eventsToDisplay: MovieReleaseEvent[]) {
     this.calendarData = [];
     const startOfMonth = this.currentDate.clone().startOf('month');
     const endOfMonth = this.currentDate.clone().endOf('month');
@@ -104,19 +134,19 @@ export class CalendarComponent implements OnInit {
         const currentDay = day.clone();
         week.push({
           date: currentDay,
-          events: this.getEventsForDay(currentDay)
+          events: this.getEventsForDay(currentDay,eventsToDisplay)
         });
         day.add(1, 'day');
       }
       this.calendarData.push(week);
     }
-    this.selectedDayEvents = this.getEventsForDay(this.currentDate);
+    this.selectedDayEvents = this.getEventsForDay(this.currentDate,eventsToDisplay);
   }
 
   /**
   * loads week data from calendarData array
   */
-  loadWeek() {
+  loadWeek(eventsToDisplay: MovieReleaseEvent[]) {
     this.calendarData = [];
     const startOfWeek = this.currentDate.clone().startOf('week');
     const week = [];
@@ -124,33 +154,33 @@ export class CalendarComponent implements OnInit {
       const currentDay = startOfWeek.clone().add(i, 'days');
       week.push({
         date: currentDay,
-        events: this.getEventsForDay(currentDay)
+        events: this.getEventsForDay(currentDay,eventsToDisplay)
       });
     }
     this.calendarData.push(week);
-    this.selectedDayEvents = this.getEventsForDay(this.currentDate);
+    this.selectedDayEvents = this.getEventsForDay(this.currentDate,eventsToDisplay);
   }
 
   /**
   * Loads particular day events using currentDate
   */
   loadDay() {
-    this.selectedDayEvents = this.getEventsForDay(this.currentDate);
+    this.selectedDayEvents = this.getEventsForDay(this.currentDate,this.filterEventsByGenres());
   }
 
   /**
    * Loads all data into datasource and visible in table
    */
-  loadList() {
-    this.dataSource.data = this.events
+  loadList(eventsToDisplay: MovieReleaseEvent[]) {
+    this.dataSource.data = eventsToDisplay
   }
 
   /**
   * @param date of moment type, of the MovieReleaseEvent interface
   * @returns events for each day by sorting according to the time
   */
-  getEventsForDay(date: moment.Moment): MovieReleaseEvent[] {
-    const eventsForDay = this.events.filter(event =>
+  getEventsForDay(date: moment.Moment, eventsToUse: MovieReleaseEvent[]): MovieReleaseEvent[] {
+    const eventsForDay = eventsToUse.filter(event =>
       moment(event.releaseDateTime).isSame(date, 'day')
     );
     return eventsForDay.sort((a, b) => a.releaseDateTime.diff(b.releaseDateTime));
@@ -161,7 +191,7 @@ export class CalendarComponent implements OnInit {
   */
   previousMonth() {
     this.currentDate = this.currentDate.subtract(1, 'month');
-    this.loadCalendar();
+    this.loadCalendar(this.filterEventsByGenres());
   }
 
   /**
@@ -169,7 +199,7 @@ export class CalendarComponent implements OnInit {
   */
   nextMonth() {
     this.currentDate = this.currentDate.add(1, 'month');
-    this.loadCalendar();
+    this.loadCalendar(this.filterEventsByGenres());
   }
 
   /**
@@ -177,7 +207,7 @@ export class CalendarComponent implements OnInit {
   */
   previousWeek() {
     this.currentDate = this.currentDate.subtract(1, 'week');
-    this.loadWeek();
+    this.loadWeek(this.filterEventsByGenres());
   }
 
   /**
@@ -185,7 +215,7 @@ export class CalendarComponent implements OnInit {
   */
   nextWeek() {
     this.currentDate = this.currentDate.add(1, 'week');
-    this.loadWeek();
+    this.loadWeek(this.filterEventsByGenres());
   }
 
   /**
@@ -209,7 +239,7 @@ export class CalendarComponent implements OnInit {
   */
   dayClicked(date: moment.Moment) {
     this.currentDate = date.clone();
-    this.selectedDayEvents = this.getEventsForDay(date);
+    this.selectedDayEvents = this.getEventsForDay(date,this.filterEventsByGenres());
 
   }
 
@@ -249,7 +279,7 @@ export class CalendarComponent implements OnInit {
           (event)=>{
             //console.log(event.releaseDateTime);
             //console.log(result.releaseDateTime);
-            const eventExists = event.releaseDateTime.format() === result.releaseDateTime.format()
+            const eventExists = event.releaseDateTime.format('YYYY-MM-DD HH:mm') === result.releaseDateTime.format('YYYY-MM-DD HH:mm')
             console.log(eventExists)
             //console.log('same time')
              
@@ -290,6 +320,7 @@ export class CalendarComponent implements OnInit {
         this.events.sort((a, b) => a.releaseDateTime.diff(b.releaseDateTime),);
         this.dataSource.data = this.events;
         this.saveEventsInLocalStorage();
+        this.extractGenres()
         this.loadView();
         // console.log(this.events);
         // if(result.releaseDateTime === this.events[0].releaseDateTime){
@@ -343,7 +374,7 @@ export class CalendarComponent implements OnInit {
       const currentDay = startOfWeek.clone().add(i, 'days');
       weekDays.push({
         date: currentDay,
-        events: this.getEventsForDay(currentDay)
+        events: this.getEventsForDay(currentDay,this.filterEventsByGenres())
       });
     }
     return weekDays;

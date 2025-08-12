@@ -29,6 +29,15 @@
         Invalid time format (HH:MM)
       </mat-error>
     </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Genre:</mat-label>
+      <mat-select formControlName="genre" required>
+        <mat-option *ngFor="let genre of availableGenres" [value]="genre">{{genre}}</mat-option>
+      </mat-select>
+      <mat-error *ngIf="eventForm.get('genre')?.hasError('required')">Genre is Required</mat-error>
+    </mat-form-field>
+
   </form>
 </div>
 <div mat-dialog-actions align="center"> 
