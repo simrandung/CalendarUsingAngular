@@ -59,9 +59,18 @@ export class CalendarComponent implements OnInit {
     this.extractGenres();
     this.loadView();
   }
+
+  /**
+   * Used to extract the particular genre and store in availableGenres array
+   */
   extractGenres() {
     this.availableGenres = [...new Set(this.events.map(event=> event.genre))]
   }
+
+  /**
+   * 
+   * @returns Selected genres events
+   */
 
   filterEventsByGenres(): MovieReleaseEvent[]{
     if(this.selectedGenre === 'All'){
@@ -70,14 +79,14 @@ export class CalendarComponent implements OnInit {
     else{
       return this.events.filter(event => event.genre === this.selectedGenre);
     }
-
   }
 
+  /**
+   * Loads the view on change of genres
+   */
   onGenreFilterChange(){
     this.loadView();
   }
-
-  
 
   /**
    * Loads events everytime from localStorage

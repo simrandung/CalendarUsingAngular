@@ -27,7 +27,6 @@
             <mat-option value="All">All Genres</mat-option>
             <mat-option *ngFor="let genre of availableGenres" [value]="genre">{{genre}}</mat-option>
         </mat-select>
-
     </mat-form-field>
 
     <mat-button-toggle-group [value]="activeView" (change)="changeView($event.value)">
@@ -36,9 +35,9 @@
         <mat-button-toggle value="list">List</mat-button-toggle>
     </mat-button-toggle-group>
 
-     <button mat-flat-button color="accent" (click)="openAddEventDialog()" style="margin-left: 10px;">
-    <mat-icon>add</mat-icon> Add Event 
-  </button>
+    <button mat-flat-button color="accent" (click)="openAddEventDialog()" style="margin-left: 10px;">
+        <mat-icon>add</mat-icon> Add Event
+    </button>
 </mat-toolbar>
 
 <div *ngIf="activeView === 'month'" class="calendar-month-view">
@@ -46,15 +45,12 @@
         <span *ngFor="let dayName of getDayNames()" class="day-name">{{ dayName }}</span>
     </div>
     <div *ngFor="let week of calendarData" class="week">
-        <div *ngFor="let day of week" class="day" 
-             [class.current-month]="isSameMonth(day.date)" 
-             [class.today]="isToday(day.date)" 
-             (click)="dayClicked(day.date)">
+        <div *ngFor="let day of week" class="day" [class.current-month]="isSameMonth(day.date)"
+            [class.today]="isToday(day.date)" (click)="dayClicked(day.date)">
             <div class="day-number">{{day.date.date()}}</div>
             <div *ngIf="day.events && day.events.length > 0" class="events-list">
                 <div *ngFor="let event of day.events" class="event-item">
-                    <span class="event-time">{{ event.releaseDateTime.format('h:mm a')  }}</span>
-
+                    <span class="event-time">{{ event.releaseDateTime.format('h:mm a') }}</span>
                     <span class="event-title" (click)="openEventDetailDialog(event)"> {{ event.title }}</span>
                 </div>
             </div>
@@ -63,7 +59,7 @@
 </div>
 
 <div *ngIf="activeView === 'week'" class="calendar-week-view">
-     <div class="week-days-header">
+    <div class="week-days-header">
         <span *ngFor="let day of getWeekDays(currentDate)" class="day-name">
             {{day.date.format('dddd DD')}}
         </span>
@@ -71,7 +67,7 @@
     <div class="week-days-content">
         <div *ngFor="let day of getWeekDays(currentDate)" class="day-column">
             <div *ngFor="let event of day.events" class="event-item">
-                <span class="event-time">{{ event.releaseDateTime.format('h:mm a') }}</span> 
+                <span class="event-time">{{ event.releaseDateTime.format('h:mm a') }}</span>
                 <span class="event-title" (click)="openEventDetailDialog(event)">{{ event.title }}</span>
             </div>
             <button mat-icon-button (click)="addEvent(day.date); " class="add-event-button">
@@ -99,7 +95,11 @@
         </ng-container>
         <ng-container matColumnDef="title">
             <th mat-header-cell *matHeaderCellDef>Title</th>
-            <td mat-cell *matCellDef="let element">{{element.title}}</td>
+            <!-- <mat-form-field>
+                <mat-label>Title</mat-label>
+                <input matInput [formControl]="titleFilterControl" />
+            </mat-form-field> -->
+            <td mat-cell *matCellDef="let element" >{{element.title}}</td>
         </ng-container>
         <ng-container matColumnDef="releaseDateTime">
             <th mat-header-cell *matHeaderCellDef>Release Time</th>
@@ -107,13 +107,17 @@
         </ng-container>
         <ng-container matColumnDef="genre">
             <th mat-header-cell *matHeaderCellDef>Genre</th>
+            <!-- <mat-form-field>
+                <mat-label>
+                    <input matInput/>
+                </mat-label>
+            </mat-form-field> -->
             <td mat-cell *matCellDef="let element">{{element.genre}}</td>
         </ng-container>
 
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
     </table>
-
 </div>
 
 
@@ -121,9 +125,9 @@
     <h3>Events for {{ currentDate.format('MMMM Do, YYYY') }}</h3>
     <ul>
         <li *ngFor="let event of selectedDayEvents">
-            <span class="event-time">{{ event.releaseDateTime.format('h:mm a') }}</span> 
+            <span class="event-time">{{ event.releaseDateTime.format('h:mm a') }}</span>
             <span class="event-title" (click)="openEventDetailDialog(event)">{{ event.title }}</span>
         </li>
     </ul>
-    
-    </div>
+
+</div>
