@@ -16,6 +16,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatDialogModule } from '@angular/material/dialog';
 import { AddEventDialogComponent } from '../add-event-dialog/add-event-dialog.component';
 import { EventDetailsDialogComponent } from '../event-details-dialog/event-details-dialog.component';
+import { EventsService } from '../service/events.service';
 
 const local_storage = 'movieReleaseEvents';
 
@@ -46,16 +47,15 @@ export class CalendarComponent implements OnInit {
   activeView: 'month' | 'week' | 'list' = 'month';
 
   dataSource = new MatTableDataSource<MovieReleaseEvent>(this.events)
-  displayedColumns: string[] = ['id', 'title', 'releaseDateTime','genre']
+  displayedColumns: string[] = ['id', 'title', 'displayDateTime','genre']
 
   availableGenres: string[] = []
   selectedGenre:string = 'All'
 
-  constructor(private dialog: MatDialog) { }
+  constructor(private dialog: MatDialog, private eventService: EventsService) { }
 
   ngOnInit(): void {
-    this.dataSource.data = this.events;
-    this.loadEventsFromLocalStorage();
+    this.loadEvents(); // Call loadEvents which uses the service
     this.extractGenres();
     this.loadView();
   }
@@ -87,32 +87,30 @@ export class CalendarComponent implements OnInit {
   onGenreFilterChange(){
     this.loadView();
   }
-
-  /**
-   * Loads events everytime from localStorage
+/**
+   * Loads events from the backend via EventService
    */
-  loadEventsFromLocalStorage() {
-    const storedEvents = localStorage.getItem(local_storage)
-    if (storedEvents) {
-      this.events = JSON.parse(storedEvents).map((event: any) => ({
-        ...event,
-        releaseDateTime: moment(event.releaseDateTime)
-      }));
-
-      this.dataSource.data = this.events;
-
-    } else {
-      this.events = [];
-      this.dataSource.data = [];
-    }
+  loadEvents() {
+    this.eventService.getEvents().subscribe(
+      (events: MovieReleaseEvent[]) => {
+        this.events = events;
+        this.dataSource.data = this.events;
+        this.extractGenres(); // Re-extract genres after loading new data
+        this.loadView();
+      },
+      error => {
+        console.error('Error loading events:', error);
+        // Handle error, e.g., show a message to the user
+      }
+    );
   }
 
   /**
    * Saves the events to the local Storage in string format
    */
-  saveEventsInLocalStorage() {
-    localStorage.setItem(local_storage, JSON.stringify(this.events))
-  }
+  // saveEventsInLocalStorage() {
+  //   localStorage.setItem(local_storage, JSON.stringify(this.events))
+  // }
 
   /**
   * Changes view of the calendar when toggeled
@@ -181,7 +179,11 @@ export class CalendarComponent implements OnInit {
    * Loads all data into datasource and visible in table
    */
   loadList(eventsToDisplay: MovieReleaseEvent[]) {
-    this.dataSource.data = eventsToDisplay
+        this.dataSource.data = eventsToDisplay.map(event => ({
+        ...event,
+        displayDateTime: event.releaseDateTime.local().format('YYYY-MM-DD HH:mm') // Format for display
+    }));
+
   }
 
   /**
@@ -190,7 +192,7 @@ export class CalendarComponent implements OnInit {
   */
   getEventsForDay(date: moment.Moment, eventsToUse: MovieReleaseEvent[]): MovieReleaseEvent[] {
     const eventsForDay = eventsToUse.filter(event =>
-      moment(event.releaseDateTime).isSame(date, 'day')
+      moment(event.releaseDateTime).isSame(date.utc(), 'day')
     );
     return eventsForDay.sort((a, b) => a.releaseDateTime.diff(b.releaseDateTime));
   }
@@ -263,83 +265,26 @@ export class CalendarComponent implements OnInit {
    * @param date of moment type,adds data to dialog box for adding new event to the array
   */
   addEvent(date: moment.Moment): void {
-    const dialogRef = this.dialog.open(AddEventDialogComponent, {
+     const dialogRef = this.dialog.open(AddEventDialogComponent, {
       width: '800px',
       data: { date: date.clone() },
-
     });
     dialogRef.afterClosed().subscribe((result: MovieReleaseEvent) => {
       if (result) {
-        //console.log(result);
-        // const eventExists = this.events.some((event) => {
-        //   const existingDate = event.releaseDateTime.clone();
-        //   const newDate = result.releaseDateTime.clone();
-        //   console.log("Existing event date:", existingDate.format('HH:mm'));
-        //   console.log("New event date:", newDate.format('HH:mm'));
-        //   console.log("Are dates and times the same?", existingDate.isSame(newDate));
-        //   return existingDate.isSame(newDate);
-        // });
-
-        // if (eventExists) {
-        //   alert('Cannot add event at the same date and time');
-        //   return;
-        // }
-        const a = this.events.some(
-          (event)=>{
-            //console.log(event.releaseDateTime);
-            //console.log(result.releaseDateTime);
-            const eventExists = event.releaseDateTime.format('YYYY-MM-DD HH:mm') === result.releaseDateTime.format('YYYY-MM-DD HH:mm')
-            console.log(eventExists)
-            //console.log('same time')
-             
-            //event.releaseDateTime.isSame(result.releaseDateTime)
-            //console.log('same too same');
-            return eventExists;
+        this.eventService.addEvent(result).subscribe(
+          (newEvent: MovieReleaseEvent) => {
+            this.events.push(newEvent); // Add the newly created event to the local array
+            this.loadEvents(); // Reload events to update all views
+          },
+          error => {
+            console.error('Error adding event:', error);
+            // Handle error, show a toast message etc.
           }
-        )
-        console.log(a);
-        if(a){
-          alert('Can not add event on same time');
-          return;
-        }
-
-        result.id = this.events.length > 0 ? Math.max(...this.events.map(e => e.id || 0)) + 1 : 1;
-        // const a = this.events.forEach(event => {
-        // console.log(event.releaseDateTime);
-        // console.log(event.releaseDateTime);
-        // console.log(event.title);
-        // event.releaseDateTime.format('HH:mm')
-        // console.log(event.releaseDateTime.format('HH:mm')); 
-        // console.log(result.releaseDateTime.format('HH:mm'));
-        // if(event.releaseDateTime.format('HH:mm') === result.releaseDateTime.format('HH:mm')){
-        //   console.log('same time');
-        //   alert('Can not add on same time'); 
-        //   }
-        // })
-        // console.log(a);
-        // this.events.forEach(b=>{
-        //    console.log(b.title);   
-        // });
-        //   console.log(this.events);
-        // }
-        //   this.events.forEach(event => {
-        //    console.log(event.title);
-        // })  
-        this.events.push(result);
-        this.events.sort((a, b) => a.releaseDateTime.diff(b.releaseDateTime),);
-        this.dataSource.data = this.events;
-        this.saveEventsInLocalStorage();
-        this.extractGenres()
-        this.loadView();
-        // console.log(this.events);
-        // if(result.releaseDateTime === this.events[0].releaseDateTime){
-        //   console.log('same time');
-        // }
-        //console.log(result);
-
+        );
       }
     });
   }
+
 
   /**
    * @param view works with toggle buttons and changes view accordingly
@@ -392,27 +337,47 @@ export class CalendarComponent implements OnInit {
   /**
    * Dialogbox for opening details of an event and delete option
   */
-  openEventDetailDialog(event: MovieReleaseEvent): void {
+ openEventDetailDialog(event: MovieReleaseEvent): void {
     const dialogRef = this.dialog.open(EventDetailsDialogComponent, {
       width: '400px',
       data: { event: event }
     })
     dialogRef.afterClosed().subscribe(result => {
       if (result === 'delete') {
-        this.deleteEvent(event.id);
+        // Check if event.id exists before passing to deleteEvent
+        if (event.id !== undefined && event.id !== null) {
+          this.deleteEvent(event.id); // <<<< Now this is correct
+        } else {
+          console.error('Attempted to delete an event with no ID from Event Details Dialog.');
+          alert('Cannot delete event without a valid ID.');
+        }
       }
     })
   }
 
-  /**
-   * @param eventId matches the id returned from dialogbox event id and delete accordingly
-   */
-  deleteEvent(eventId: number | undefined): void {
-    if (eventId !== undefined) {
-      this.events = this.events.filter(event => event.id !== eventId);
-      this.dataSource.data = this.events;
-      this.saveEventsInLocalStorage();
-      this.loadView();
+  deleteEvent(eventId: number): void { // Change type from MovieReleaseEvent to number
+    // No need for eventToDelete.id, directly use eventId
+    if (confirm(`Are you sure you want to delete this event?`)) { // Confirmation message might need to be more generic now
+      if (eventId !== undefined && eventId !== null) { // Check for undefined/null ID
+        this.eventService.deleteEvent(eventId).subscribe( // Pass eventId directly
+          () => {
+            // Remove the deleted event from the local array
+            this.events = this.events.filter(event => event.id !== eventId);
+            this.dataSource.data = this.events; // Update MatTableDataSource
+            this.extractGenres(); // Re-extract genres if an event was removed
+            this.loadView(); // Refresh the calendar view
+            console.log(`Event with ID ${eventId} deleted successfully.`);
+            // Optionally, show a snackbar message here (e.g., MatSnackBar)
+          },
+          error => {
+            console.error('Error deleting event:', error);
+            alert(`Failed to delete event: ${error.message || 'Unknown error'}`);
+          }
+        );
+      } else {
+        console.error('Cannot delete event: ID is undefined or null.');
+        alert('Cannot delete event without a valid ID.');
+      }
     }
   }
 }

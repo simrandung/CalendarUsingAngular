@@ -50,7 +50,7 @@
             <div class="day-number">{{day.date.date()}}</div>
             <div *ngIf="day.events && day.events.length > 0" class="events-list">
                 <div *ngFor="let event of day.events" class="event-item">
-                    <span class="event-time">{{ event.releaseDateTime.format('h:mm a') }}</span>
+                    <span class="event-time">{{ event.releaseDateTime.local().format('h:mm a') }}</span>
                     <span class="event-title" (click)="openEventDetailDialog(event)"> {{ event.title }}</span>
                 </div>
             </div>
@@ -67,7 +67,7 @@
     <div class="week-days-content">
         <div *ngFor="let day of getWeekDays(currentDate)" class="day-column">
             <div *ngFor="let event of day.events" class="event-item">
-                <span class="event-time">{{ event.releaseDateTime.format('h:mm a') }}</span>
+                <span class="event-time">{{ event.releaseDateTime.local().format('h:mm a') }}</span>
                 <span class="event-title" (click)="openEventDetailDialog(event)">{{ event.title }}</span>
             </div>
             <button mat-icon-button (click)="addEvent(day.date); " class="add-event-button">
@@ -101,9 +101,9 @@
             </mat-form-field> -->
             <td mat-cell *matCellDef="let element" >{{element.title}}</td>
         </ng-container>
-        <ng-container matColumnDef="releaseDateTime">
+        <ng-container matColumnDef="displayDateTime">
             <th mat-header-cell *matHeaderCellDef>Release Time</th>
-            <td mat-cell *matCellDef="let element">{{element.releaseDateTime.format('HH:mm a')}}</td>
+            <td mat-cell *matCellDef="let element">{{element.releaseDateTime.local().format('HH:mm a')}}</td>
         </ng-container>
         <ng-container matColumnDef="genre">
             <th mat-header-cell *matHeaderCellDef>Genre</th>
